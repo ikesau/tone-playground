@@ -4,10 +4,32 @@ body {
   background: #000;
 }
 
+.start-button-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  background: #000000ab;
+}
+
+.start-button-container .button {
+  color: white;
+  padding: 24px;
+  margin: auto;
+  max-width: 128px;
+  text-align: center;
+  font-size: 24px;
+}
+
 .controls-container {
   position: fixed;
   color: #fff;
   margin: 12px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  flex-wrap: wrap;
 }
 
 .controls {
@@ -15,6 +37,19 @@ body {
   padding: 4px;
   display: flex;
   flex-direction: column;
+}
+
+.button {
+  border: 1px solid currentcolor;
+  color: inherit;
+  background: black;
+  flex: 1;
+  margin: 2px;
+}
+
+.add-pattern-button-wrapper {
+  display: flex;
+  order: 1;
 }
 
 circle.on {
@@ -27,6 +62,10 @@ circle.on.active {
   transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
+circle.on.muted {
+  r: 4px;
+}
+
 circle.off {
   r: 4px;
 }
@@ -35,42 +74,52 @@ circle.off {
 
 .colour-d8973c {
   border-color: #d8973c;
+  color: #d8973c;
 }
 
 .colour-c3dfe0 {
   border-color: #c3dfe0;
+  color: #c3dfe0;
 }
 
 .colour-5d675b {
   border-color: #5d675b;
+  color: #5d675b;
 }
 
 .colour-5a4085 {
   border-color: #5a4085;
+  color: #5a4085;
 }
 
 .colour-8b80f9 {
   border-color: #8b80f9;
+  color: #8b80f9;
 }
 
 .colour-beb8eb {
   border-color: #beb8eb;
+  color: #beb8eb;
 }
 
 .colour-04c7b0 {
   border-color: #04c7b0;
+  color: #04c7b0;
 }
 
 .colour-db3d50 {
   border-color: #db3d50;
+  color: #db3d50;
 }
 
 .colour-f97068 {
   border-color: #f97068;
+  color: #f97068;
 }
 
 .colour-fffdfd {
   border-color: #fffdfd;
+  color: #fffdfd;
 }
 
 /* Inputs */

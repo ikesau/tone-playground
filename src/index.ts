@@ -79,9 +79,9 @@ class Pattern {
           const circle = d3.selectAll(
             `#${pattern.getId()} circle:nth-child(${index + 1})`,
           )
-          circle.attr('class', 'on active')
+          circle.classed('on active', true)
           setTimeout(() => {
-            circle.attr('class', 'on')
+            circle.classed('active', false)
           }, 100)
         }, time)
       },
@@ -102,7 +102,9 @@ class Pattern {
   setToneSequence() {
     this.toneSequence.clear()
     this.toneSequence = this.buildToneSequenceData()
-    this.toneSequence.start(0)
+    if (Tone.Transport.state === 'started') {
+      this.toneSequence.start(0)
+    }
   }
 
   getNote() {
@@ -148,12 +150,7 @@ class Pattern {
   }
 }
 
-const patterns: Pattern[] = [
-  new Pattern(2, 3),
-  // new Pattern(random(1, 5), random(3, 5)),
-  // new Pattern(random(2, 5), random(2, 5)),
-  // new Pattern(random(2, 5), random(2, 5)),
-]
+const patterns: Pattern[] = [new Pattern(random(1, 5), random(3, 5))]
 
 const sampler = new Tone.Sampler({
   urls: notes.reduce((acc, key) => ({ ...acc, [key]: `${key}.mp3` }), {}),
@@ -166,24 +163,33 @@ const controlsContainer = d3
   .attr('class', 'controls-container')
 
 controlsContainer
+  .append('div')
+  .attr('class', 'add-pattern-button-wrapper')
   .append('button')
+  .attr('class', 'button')
   .text('+')
   .on('click', () => {
-    const pattern = new Pattern(random(10), random(10))
+    const pattern = new Pattern(random(1, 10), random(1, 10))
     patterns.push(pattern)
-    pattern.getToneSequence().start(0)
+    if (Tone.Transport.state == 'started') {
+      pattern.getToneSequence().start(0)
+    }
     draw()
     renderControls()
   })
 
-controlsContainer
+d3.select('body')
+  .append('div')
+  .attr('class', 'start-button-container')
   .append('button')
+  .attr('class', 'button')
   .text('start')
   .on('click', () => {
     Tone.Transport.start(0, 0)
     patterns.forEach((pattern) => {
       pattern.getToneSequence().start(0)
     })
+    d3.select('.start-button-container').remove()
   })
 
 function renderControls() {
@@ -212,7 +218,7 @@ function renderControls() {
   controls
     .append('input')
     .attr('type', 'range')
-    .attr('min', '1')
+    .attr('min', '0')
     .attr('max', '10')
     .attr('step', '1')
     .attr('value', (pattern) => pattern.getOff())
@@ -247,15 +253,23 @@ function renderControls() {
 
   controls
     .append('button')
-    .text('mute')
+    .text((pattern) => (pattern.getToneSequence().mute ? 'unmute' : 'mute'))
+    .attr('class', 'button')
     .on('click', function (_, pattern) {
       const toneSequence = pattern.getToneSequence()
-      // https://github.com/Tonejs/Tone.js/issues/823
       toneSequence.mute = !toneSequence.mute
+      // d3.selectAll(`#${pattern.getId()} circle`).classed(
+      //   'muted',
+      //   toneSequence.mute,
+      // )
+      renderControls()
+      draw()
     })
+
   controls
     .append('button')
     .text('remove')
+    .attr('class', 'button')
     .on('click', function (_, pattern) {
       pattern.getToneSequence().dispose()
       patterns.splice(patterns.indexOf(pattern), 1)
@@ -295,7 +309,17 @@ function draw() {
       const radius = 50 * patterns.indexOf(pattern) + 50
       return Math.sin((i * 2 * Math.PI) / patternData.length) * radius
     })
-    .attr('class', (x) => (x === '1' ? 'on' : 'off'))
+    .attr('class', function (x, i, t) {
+      // @ts-ignore
+      const pattern: Pattern = d3.select(this?.parentNode).datum()
+      const isMuted = pattern.getToneSequence().mute
+
+      return cx({
+        on: x === '1',
+        off: x !== '1',
+        muted: isMuted,
+      })
+    })
 
   // polygons
   svg.selectAll('polygon').remove()
@@ -308,7 +332,9 @@ function draw() {
     .attr('stroke', function () {
       // @ts-ignore
       const pattern: Pattern = d3.select(this?.parentNode).datum()
-      return pattern.getColour()
+      return pattern.getToneSequence().mute
+        ? 'transparent'
+        : pattern.getColour()
     })
     .attr('points', function (pattern) {
       return pattern
@@ -381,4 +407,11 @@ function debounce(fn: Function, ms = 300) {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => fn.apply(this, args), ms)
   }
+}
+
+function cx(classes: Record<string, boolean>): string {
+  return Object.keys(classes).reduce((acc: string, key: string) => {
+    if (classes[key]) return acc + ' ' + key
+    return acc
+  }, '')
 }
