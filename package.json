@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc",
-    "serve": "parcel index.html"
+    "serve": "parcel index.html",
+    "postbuild": "cp -r samples/* dist/"
   },
   "author": "",
   "license": "ISC",
