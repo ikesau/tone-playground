@@ -2,7 +2,6 @@
   "name": "tone-playground",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "tsc",
     "serve": "parcel index.html",
